@@ -16,7 +16,6 @@ rate_limit = 3.0
 def initialize_gpio():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(relay_pin, GPIO.OUT)
-    GPIO.output(relay_pin, GPIO.LOW)
 
 
 def mean(numbers):
