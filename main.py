@@ -12,27 +12,32 @@ loop_seconds = 60
 # limit in cents per kwh, above this level relay is disabled
 rate_limit = 3.5
 
+
 def initialize_gpio():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(relay_pin, GPIO.OUT)
     GPIO.output(relay_pin, GPIO.HIGH)
 
+
 def mean(numbers):
     return float(sum(numbers)) / max(len(numbers), 1)
 
+
 def get_rate():
     rates = json.load(urlopen(comed_api))
-    rateset=[]
+    rateset = []
     for i in range(12):
-        rateset.append (float(rates[i]['price']))
+        rateset.append(float(rates[i]['price']))
     return mean(rateset)
 
+
 def set_relay(state):
-    if state == True:
+    if state:
         GPIO.output(relay_pin, GPIO.HIGH)
     else:
         GPIO.output(relay_pin, GPIO.LOW)
     return state
+
 
 def main_loop():
     state = "new"
@@ -49,6 +54,7 @@ def main_loop():
                 print "enabling, rate is " + str(current) + "cents per kWh."
                 state = set_relay(True)
         sleep(loop_seconds)
+
 
 if __name__ == '__main__':
     try:
