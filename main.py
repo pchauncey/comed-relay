@@ -6,7 +6,7 @@ from urllib2 import urlopen
 import RPi.GPIO as GPIO
 
 comed_api = "https://hourlypricing.comed.com/api?type=5minutefeed"
-relay_pin = 25
+relay_pin = 26
 loop_seconds = 60
 
 # limit in cents per kwh, above this level relay is disabled
