@@ -10,13 +10,13 @@ relay_pin = 26
 loop_seconds = 60
 
 # limit in cents per kwh, above this level relay is disabled
-rate_limit = 3.5
+rate_limit = 3.0
 
 
 def initialize_gpio():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(relay_pin, GPIO.OUT)
-    GPIO.output(relay_pin, GPIO.HIGH)
+    GPIO.output(relay_pin, GPIO.LOW)
 
 
 def mean(numbers):
@@ -33,9 +33,9 @@ def get_rate():
 
 def set_relay(state):
     if state:
-        GPIO.output(relay_pin, GPIO.HIGH)
-    else:
         GPIO.output(relay_pin, GPIO.LOW)
+    else:
+        GPIO.output(relay_pin, GPIO.HIGH)
     return state
 
 
