@@ -17,10 +17,15 @@ def initialize_gpio():
     GPIO.setup(relay_pin, GPIO.OUT)
     GPIO.output(relay_pin, GPIO.HIGH)
 
+def mean(numbers):
+    return float(sum(numbers)) / max(len(numbers), 1)
+
 def get_rate():
     rates = json.load(urlopen(comed_api))
-    # current rate in cents per kwh:
-    return float(rates[0]['price'])
+    rateset=[]
+    for i in range(12):
+        rateset.append (float(rates[i]['price']))
+    return mean(rateset)
 
 def set_relay(state):
     if state == True:
@@ -30,31 +35,20 @@ def set_relay(state):
     return state
 
 def main_loop():
-
     state = "new"
-
-    # loop begins
     while True:
-
-        # pull current rate
         current = get_rate()
-
         # rate is high:
         if (current > rate_limit):
-
             if (state != False):
                 print "disabling, rate is " + str(current) + "cents per kWh."
                 state = set_relay(False)
-
         # rate is low:
         else:
-
             if (state != True):
                 print "enabling, rate is " + str(current) + "cents per kWh."
                 state = set_relay(True)
-
         sleep(loop_seconds)
-
 
 if __name__ == '__main__':
     try:
