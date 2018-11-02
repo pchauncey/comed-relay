@@ -10,7 +10,7 @@ relay_pin = 26
 loop_seconds = 60
 
 # limit in cents per kwh, above this level relay is disabled
-rate_limit = 3.0
+rate_limit = 2.5
 
 
 def initialize_gpio():
