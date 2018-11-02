@@ -25,10 +25,8 @@ def get_rate():
 def set_relay(state):
     if state == True:
         GPIO.output(relay_pin, GPIO.HIGH)
-        True
     else:
         GPIO.output(relay_pin, GPIO.LOW)
-        False
     return state
 
 def main_loop():
