@@ -67,5 +67,6 @@ if __name__ == '__main__':
         initialize_gpio()
         main_loop()
     except KeyboardInterrupt:
+        timestamp = datetime.datetime.now()
         print str(timestamp) + ": Cleaning up."
         GPIO.cleanup()
