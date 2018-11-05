@@ -5,7 +5,9 @@ from time import sleep
 from urllib2 import urlopen
 from urllib2 import URLError
 import RPi.GPIO as GPIO
-import datetime
+import logging
+import sys
+import signal
 
 comed_api = "https://hourlypricing.comed.com/api?type=5minutefeed"
 relay_pin = 26
@@ -29,7 +31,7 @@ def get_rate():
     rateset = []
     for i in range(12):
         rateset.append(float(rates[i]['price']))
-    return round(mean(rateset),1)
+    return round(mean(rateset), 1)
 
 
 def set_relay(state):
@@ -40,7 +42,16 @@ def set_relay(state):
     return state
 
 
-def main_loop():
+def cleanup(signal, frame):
+    logging.warning("shutting down.")
+    GPIO.cleanup()
+    sys.exit(0)
+
+
+def main():
+    signal.signal(signal.SIGTERM, cleanup)
+    signal.signal(signal.SIGINT, cleanup)
+    initialize_gpio()
     state = "new"
     while True:
         try:
@@ -49,24 +60,18 @@ def main_loop():
             sleep(loop_seconds)
             continue
 
-        timestamp = datetime.datetime.now()
         # rate is high:
         if (current > rate_limit):
             if (state != False):
-                print str(timestamp) + ": disabling, rate is " + str(current) + " cents per kWh."
+                logging.warning("disabling, rate is " + str(current) + " cents per kWh.")
                 state = set_relay(False)
         # rate is low:
         else:
             if (state != True):
-                print str(timestamp) + ": enabling, rate is " + str(current) + " cents per kWh."
+                logging.warning("enabling, rate is " + str(current) + " cents per kWh.")
                 state = set_relay(True)
         sleep(loop_seconds)
 
+
 if __name__ == '__main__':
-    try:
-        initialize_gpio()
-        main_loop()
-    except KeyboardInterrupt:
-        timestamp = datetime.datetime.now()
-        print str(timestamp) + ": Cleaning up."
-        GPIO.cleanup()
+    main()
