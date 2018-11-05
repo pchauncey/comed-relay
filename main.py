@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import json
-from time import sleep
-from urllib2 import urlopen
-from urllib2 import URLError
-import RPi.GPIO as GPIO
 import logging
-import sys
+import RPi.GPIO as GPIO
 import signal
+from sys import exit
+from time import sleep
+from urllib2 import URLError
+from urllib2 import urlopen
 
 comed_api = "https://hourlypricing.comed.com/api?type=5minutefeed"
 relay_pin = 26
@@ -45,31 +45,36 @@ def set_relay(state):
 def cleanup(signal, frame):
     logging.warning("shutting down.")
     GPIO.cleanup()
-    sys.exit(0)
+    exit(0)
 
 
 def main():
+    # catch these termination signals:
     signal.signal(signal.SIGTERM, cleanup)
     signal.signal(signal.SIGINT, cleanup)
+    # initialization:
     initialize_gpio()
     state = "new"
+
     while True:
         try:
             current = get_rate()
         except URLError:
+            # sleep out a timeout / lookup error:
             sleep(loop_seconds)
             continue
 
-        # rate is high:
         if (current > rate_limit):
+            # rate is high:
             if (state != False):
                 logging.warning("disabling, rate is " + str(current) + " cents per kWh.")
                 state = set_relay(False)
-        # rate is low:
         else:
+            # rate is low:
             if (state != True):
                 logging.warning("enabling, rate is " + str(current) + " cents per kWh.")
                 state = set_relay(True)
+
         sleep(loop_seconds)
 
 
