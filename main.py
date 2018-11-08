@@ -9,15 +9,15 @@ from time import sleep
 from urllib2 import URLError
 from urllib2 import urlopen
 
-comed_api = "https://hourlypricing.comed.com/api?type=5minutefeed"
-relay_pin = 26
-loop_seconds = 60
-
-# limit in cents per kwh, above this level relay is disabled
-rate_limit = 2.5
+def get_config(key):
+    with open('config.json', 'r') as file:
+        data = json.load(file)
+    return data[key]
 
 
 def initialize_gpio():
+    global relay_pin
+    relay_pin = get_config("relay_pin")
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(relay_pin, GPIO.OUT)
 
@@ -27,6 +27,8 @@ def mean(numbers):
 
 
 def get_rate():
+    global comed_api
+    comed_api = get_config("comed_api")
     rates = json.load(urlopen(comed_api))
     rateset = []
     for i in range(12):
@@ -57,6 +59,9 @@ def main():
     state = "new"
 
     while True:
+        # allow these to be changes during loop
+        rate_limit = get_config("rate_limit")
+        loop_seconds = get_config("loop_seconds")
         try:
             current = get_rate()
         except URLError:
@@ -67,12 +72,12 @@ def main():
         if (current > rate_limit):
             # rate is high:
             if (state != False):
-                logging.warning("disabling, rate is " + str(current) + " cents per kWh.")
+                logging.warning("disabling, rate is " + str(current) + " cents per kWh, and limit is" str(rate_limit))
                 state = set_relay(False)
         else:
             # rate is low:
             if (state != True):
-                logging.warning("enabling, rate is " + str(current) + " cents per kWh.")
+                logging.warning("enabling, rate is " + str(current) + " cents per kWh, and limit is" str(rate_limit))
                 state = set_relay(True)
 
         sleep(loop_seconds)
