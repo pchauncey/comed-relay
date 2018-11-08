@@ -72,12 +72,12 @@ def main():
         if (current > rate_limit):
             # rate is high:
             if (state != False):
-                logging.warning("disabling, rate is " + str(current) + " cents per kWh, and limit is" str(rate_limit))
+                logging.warning("disabling, rate is " + str(current) + " cents per kWh, and limit is " + str(rate_limit))
                 state = set_relay(False)
         else:
             # rate is low:
             if (state != True):
-                logging.warning("enabling, rate is " + str(current) + " cents per kWh, and limit is" str(rate_limit))
+                logging.warning("enabling, rate is " + str(current) + " cents per kWh, and limit is " + str(rate_limit))
                 state = set_relay(True)
 
         sleep(loop_seconds)
