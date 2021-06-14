@@ -12,6 +12,7 @@ from urllib2 import urlopen
 def get_config(key):
     with open('config.json', 'r') as file:
         data = json.load(file)
+    file.close()
     return data[key]
 
 
