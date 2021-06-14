@@ -28,9 +28,9 @@ def mean(numbers):
 
 
 def get_rate():
-    global comed_api
-    comed_api = get_config("comed_api")
-    rates = json.load(urlopen(comed_api))
+    global comed_api_url
+    comed_api_url = get_config("comed_api_url")
+    rates = json.load(urlopen(comed_api_url))
     rateset = []
     for i in range(12):
         rateset.append(float(rates[i]['price']))
