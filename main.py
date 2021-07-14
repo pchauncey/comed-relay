@@ -2,12 +2,13 @@
 
 import json
 import logging
-import RPi.GPIO as GPIO
+import requests
 import signal
+import RPi.GPIO as GPIO
 from sys import exit
 from time import sleep
-from urllib2 import URLError
-from urllib2 import urlopen
+from requests.exceptions import HTTPError
+
 
 def get_config(key):
     with open('config.json', 'r') as file:
@@ -30,7 +31,8 @@ def mean(numbers):
 def get_rate():
     global comed_api_url
     comed_api_url = get_config("comed_api_url")
-    rates = json.load(urlopen(comed_api_url))
+    rates = requests.get(comed_api_url)
+    rates = rates.json()
     rateset = []
     for i in range(12):
         rateset.append(float(rates[i]['price']))
@@ -45,7 +47,7 @@ def set_relay(state):
     return state
 
 
-def cleanup(signal, frame):
+def cleanup():
     logging.warning("shutting down.")
     GPIO.cleanup()
     exit(0)
@@ -65,19 +67,20 @@ def main():
         loop_seconds = get_config("loop_seconds")
         try:
             current = get_rate()
-        except URLError:
+        except HTTPError as http_error:
             # sleep out a timeout / lookup error:
+            print(f'HTTP error occurred: {http_error}')
             sleep(loop_seconds)
             continue
 
-        if (current > rate_limit):
+        if current > rate_limit:
             # rate is high:
-            if (state != False):
+            if state is not False:
                 logging.warning("disabling, rate is " + str(current) + " cents per kWh, and limit is " + str(rate_limit))
                 state = set_relay(False)
         else:
             # rate is low:
-            if (state != True):
+            if state is not True:
                 logging.warning("enabling, rate is " + str(current) + " cents per kWh, and limit is " + str(rate_limit))
                 state = set_relay(True)
 
