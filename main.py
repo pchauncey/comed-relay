@@ -47,7 +47,7 @@ def set_relay(state):
     return state
 
 
-def cleanup():
+def cleanup(signal, frame):
     logging.warning("shutting down.")
     GPIO.cleanup()
     exit(0)

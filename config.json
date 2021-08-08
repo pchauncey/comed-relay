@@ -2,5 +2,5 @@
 	"comed_api_url": "https://hourlypricing.comed.com/api?type=5minutefeed",
 	"relay_pin": 26,
 	"loop_seconds": 60,
-	"rate_limit": 2.5
+	"rate_limit": 3.0
 }
